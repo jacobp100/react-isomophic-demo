@@ -6,6 +6,7 @@ import { Router } from 'react-router';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
+import fetchMiddleware from './middlewares/fetch';
 import history from './history';
 import routes from './routes';
 import { reducers } from './redux';
@@ -13,7 +14,10 @@ import { reducers } from './redux';
 
 const initialState = global.__REDUX_STATE__ || {}; // eslint-disable-line
 const endpoint = global.__API_ENDPOINT__ || ''; // eslint-disable-line
-const middlewares = applyMiddleware(thunk);
+const middlewares = applyMiddleware(
+  thunk,
+  fetchMiddleware(global.fetch)
+);
 
 const store = createStore(reducers, initialState, middlewares);
 
