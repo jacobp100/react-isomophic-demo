@@ -17,7 +17,7 @@ import { RouterContext, match } from 'react-router';
 import fetch from 'node-fetch';
 import fetchMiddleware from '../src/middlewares/fetch';
 import handlers from '../src/handlers';
-import createRoutes from '../src/routes';
+import routes from '../src/routes';
 import { reducers } from '../src/redux';
 
 import { readFileSync } from 'fs';
@@ -92,8 +92,6 @@ server.post('*', async (req, res, next) => {
 // RENDER PAGE
 server.all('*', (req, res) => {
   const { store } = req;
-
-  const routes = createRoutes(store);
 
   match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
     if (redirectLocation) {

@@ -20,7 +20,7 @@ class Cats extends Component {
     return (
       <div>
         <h1>Add Cat</h1>
-        <form onSubmit={handleCatAddition}>
+        <form method="POST" onSubmit={handleCatAddition}>
           <input type="hidden" name="handler" value="add-cat" />
           <div>
             <label htmlFor="name">Name</label>

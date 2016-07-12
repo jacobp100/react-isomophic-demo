@@ -19,6 +19,12 @@ const defaultState = {
   didSetCats: false,
 };
 
+const defaultCats = [
+  { id: 'default-1', name: 'Sprinkles', age: 8 },
+  { id: 'default-2', name: 'Boots', age: 5 },
+  { id: 'default-3', name: 'Waffles', age: 9 },
+];
+
 export const SET_CATS = 'cats/SET_CATS';
 export const UPDATE_CAT = 'cats/UPDATE_CAT';
 export const ADD_CAT = 'cats/ADD_CAT';
@@ -59,14 +65,12 @@ export const getCats = () => async (dispatch, getState) => {
 
   if (didSetCats) return;
 
-  dispatch({ type: SET_CATS, cats: [
-    { id: 'default-1', name: 'Sprinkles', age: 8 },
-    { id: 'default-2', name: 'Boots', age: 5 },
-    { id: 'default-3', name: 'Waffles', age: 9 },
-  ] });
+  dispatch({ type: SET_CATS, cats: defaultCats });
 };
 
 export const updateCat = (id, params) => async dispatch => {
+  // FIXME: Api post
+  Object.assign(defaultCats.find(cat => cat.id === id), params);
   dispatch({ type: UPDATE_CAT, cat: set('id', id, params) });
 };
 
@@ -85,12 +89,9 @@ export const updateRemoveCatViaForm = inputParams => async dispatch => {
       stripUnknown: true,
     });
 
-    if (action === 'update') {
-      return await dispatch(updateCat(id, params));
-    } else if (action === 'remove') {
-      return await dispatch(deleteCat(id));
-    }
-    return null;
+    return await action === 'remove'
+      ? dispatch(deleteCat(id))
+      : dispatch(updateCat(id, params));
   } catch (e) {
     const errors = yupErrors(e);
     const id = inputParams.id;

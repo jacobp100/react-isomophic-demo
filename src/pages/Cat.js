@@ -22,7 +22,7 @@ class Cats extends Component {
     return (
       <div>
         <h1>{cat.name}</h1>
-        <form>
+        <form method="POST">
           <input type="hidden" name="handler" value="update-remove-cat" />
           <input type="hidden" name="id" value={cat.id} />
           <div>
@@ -35,11 +35,11 @@ class Cats extends Component {
             <input id="age" type="number" name="age" defaultValue={cat.age} />
             <div>{formErrors.age}</div>
           </div>
+          <button name="action" value="update" onClick={handleFormSubmission}>
+            Update
+          </button>
           <button name="action" value="remove" onClick={handleCatDeletion}>
             Delete
-          </button>
-          <button name="action" value="update" onClick={handleFormSubmission}>
-            update
           </button>
         </form>
         <Link to="/">Back</Link>
