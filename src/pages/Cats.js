@@ -1,24 +1,44 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import { map } from 'lodash/fp';
-import { getCats } from '../redux/cats';
+import { __, map, update, assign } from 'lodash/fp';
+import history from '../history';
+import { setQueryParams, getCats } from '../redux/cats';
+import { getFormData } from '../formDispatcher';
 
 class Cats extends Component {
-  static fetchData({ dispatch }) {
-    return dispatch(getCats());
+  static fetchData({ location, dispatch }) {
+    return dispatch(setQueryParams(location.query))
+      .then(() => dispatch(getCats()));
   }
 
   componentDidMount() {
     Cats.fetchData(this.props);
   }
 
+  componentDidUpdate() {
+    Cats.fetchData(this.props);
+  }
+
   render() {
-    const { catIds, cats } = this.props;
+    const { catIds, cats, genderFilter, setFilter } = this.props;
 
     return (
       <div>
         <h1>Cats</h1>
+        <form method="GET" onSubmit={setFilter}>
+          <label>
+            Gender <select name="gender" defaultValue={genderFilter}>
+              <option value="">Any</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </label>
+          <button>
+            Filter
+          </button>
+        </form>
+        <hr />
         {map(id => (
           <Link key={id} to={`/cats/${id}`}>
             <div>
@@ -39,5 +59,14 @@ export default connect(
   state => ({
     catIds: state.cats.catIds,
     cats: state.cats.cats,
+    genderFilter: state.cats.genderFilter,
+  }),
+  (dispatch, { location }) => ({
+    setFilter: e => {
+      const formQuery = getFormData(e);
+      const locationWithFormQuery = update('query', assign(__, formQuery), location);
+      history.replace(locationWithFormQuery);
+    },
+    dispatch,
   })
 )(Cats);

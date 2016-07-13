@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import history from '../history';
-import { formDispatcher } from '../util';
+import { formDispatcher } from '../formDispatcher';
 
 const AddCat = ({ formErrors, handleCatAddition }) => (
   <div>

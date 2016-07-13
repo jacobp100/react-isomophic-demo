@@ -1,7 +1,7 @@
 const Express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { uniqueId } = require('lodash/fp');
+const { filter, matches, uniqueId } = require('lodash/fp');
 
 const server = new Express();
 server.use(bodyParser.json());
@@ -9,14 +9,14 @@ server.use(cors());
 
 const database = {
   cats: [
-    { id: uniqueId(), name: 'Sprinkles', age: 8 },
-    { id: uniqueId(), name: 'Boots', age: 5 },
-    { id: uniqueId(), name: 'Waffles', age: 9 },
+    { id: uniqueId(), name: 'Sprinkles', age: 8, gender: 'male' },
+    { id: uniqueId(), name: 'Boots', age: 5, gender: 'male' },
+    { id: uniqueId(), name: 'Waffles', age: 9, gender: 'female' },
   ],
 };
 
 server.get('/cats', (req, res) => {
-  res.json(database.cats);
+  res.json(filter(matches(req.query), database.cats));
 });
 
 server.put('/cats', (req, res) => {

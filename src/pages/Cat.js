@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import history from '../history';
 import { getCats } from '../redux/cats';
-import { formDispatcher } from '../util';
+import { formDispatcher } from '../formDispatcher';
 
 class Cats extends Component {
   static fetchData({ dispatch }) {

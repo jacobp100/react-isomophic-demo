@@ -1,9 +1,9 @@
 import {
-  __, flow, set, update, map, reduce, assign, reject, equals, omit, curry, union, flip,
+  __, flow, set, update, map, reduce, assign, reject, equals, omit, curry, union, flip, compact,
 } from 'lodash/fp';
 import yup from 'yup';
 import { fetchJson } from '../middlewares/fetch';
-import { yupErrors } from '../yupUtil';
+import { yupErrors } from '../util';
 
 
 const addUpdateRemoveCatSchema = yup.object().shape({
@@ -17,12 +17,14 @@ const defaultState = {
   catIds: [],
   cats: {},
   formErrorsPerCat: {},
+  genderFilter: '',
   didSetCats: false,
 };
 
 export const SET_CATS = 'cats/SET_CATS';
 export const UPDATE_CAT = 'cats/UPDATE_CAT';
 export const REMOVE_CAT = 'cats/REMOVE_CAT';
+export const SET_FILTER = 'cats/SET_FILTER';
 export const SET_CAT_FORM_ERRORS = 'cats/SET_CAT_FORM_ERRORS';
 
 
@@ -43,6 +45,13 @@ export default (state = defaultState, action) => {
       )(state);
     case REMOVE_CAT:
       return update('catIds', reject(equals(action.id)), state);
+    case SET_FILTER:
+      return action.genderFilter === state.genderFilter
+        ? state
+        : flow(
+          set('genderFilter', action.genderFilter),
+          set('didSetCats', false)
+        )(state);
     case SET_CAT_FORM_ERRORS:
       return set(['formErrorsPerCat', action.id], action.errors, state);
     default:
@@ -51,12 +60,16 @@ export default (state = defaultState, action) => {
 };
 
 export const getCats = () => async (dispatch, getState) => {
-  const { didSetCats } = getState().cats || {};
+  const { didSetCats, genderFilter } = getState().cats || {};
 
   if (didSetCats) return;
 
   try {
-    const cats = await dispatch(fetchJson('GET', '/cats'));
+    const query = compact([
+      genderFilter && `gender=${genderFilter}`,
+    ]).join('&');
+    const url = compact(['/cats', query]).join('?');
+    const cats = await dispatch(fetchJson('GET', url));
     dispatch({ type: SET_CATS, cats });
   } catch (e) {
     // FIXME: Handle errors
@@ -88,6 +101,11 @@ export const deleteCat = id => async dispatch => {
   } catch (e) {
     // FIXME: Handle errors
   }
+};
+
+export const setQueryParams = inputParams => async dispatch => {
+  // Async because you might use validation
+  dispatch({ type: SET_FILTER, genderFilter: inputParams.gender });
 };
 
 export const updateRemoveCatViaForm = inputParams => async dispatch => {
