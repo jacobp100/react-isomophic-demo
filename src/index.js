@@ -16,7 +16,7 @@ const initialState = global.__REDUX_STATE__ || {}; // eslint-disable-line
 const endpoint = global.__API_ENDPOINT__ || ''; // eslint-disable-line
 const middlewares = applyMiddleware(
   thunk,
-  fetchMiddleware(global.fetch)
+  fetchMiddleware(endpoint, global.fetch)
 );
 
 const store = createStore(reducers, initialState, middlewares);

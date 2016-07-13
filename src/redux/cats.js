@@ -1,7 +1,8 @@
 import {
-  __, flow, set, update, map, reduce, assign, reject, equals, omit, uniqueId, curry, concat, flip,
+  __, flow, set, update, map, reduce, assign, reject, equals, omit, curry, union, flip,
 } from 'lodash/fp';
 import yup from 'yup';
+import { fetchJson } from '../middlewares/fetch';
 import { yupErrors } from '../yupUtil';
 
 
@@ -19,15 +20,8 @@ const defaultState = {
   didSetCats: false,
 };
 
-const defaultCats = [
-  { id: 'default-1', name: 'Sprinkles', age: 8 },
-  { id: 'default-2', name: 'Boots', age: 5 },
-  { id: 'default-3', name: 'Waffles', age: 9 },
-];
-
 export const SET_CATS = 'cats/SET_CATS';
 export const UPDATE_CAT = 'cats/UPDATE_CAT';
-export const ADD_CAT = 'cats/ADD_CAT';
 export const REMOVE_CAT = 'cats/REMOVE_CAT';
 export const SET_CAT_FORM_ERRORS = 'cats/SET_CAT_FORM_ERRORS';
 
@@ -42,14 +36,10 @@ export default (state = defaultState, action) => {
         reduce(flip(updateCatInState), __, action.cats),
         set('didSetCats', true)
       )(state);
-    case UPDATE_CAT:
-      return updateCatInState(action.cat, state);
-    case ADD_CAT: // eslint-disable-line
-      const id = uniqueId();
-      const cat = set('id', id, action.cat);
+    case UPDATE_CAT: // eslint-disable-line
       return flow(
-        update('catIds', concat(id)),
-        updateCatInState(cat)
+        update('catIds', union([action.cat.id])),
+        updateCatInState(action.cat)
       )(state);
     case REMOVE_CAT:
       return update('catIds', reject(equals(action.id)), state);
@@ -65,21 +55,39 @@ export const getCats = () => async (dispatch, getState) => {
 
   if (didSetCats) return;
 
-  dispatch({ type: SET_CATS, cats: defaultCats });
+  try {
+    const cats = await dispatch(fetchJson('GET', '/cats'));
+    dispatch({ type: SET_CATS, cats });
+  } catch (e) {
+    // FIXME: Handle errors
+  }
 };
 
 export const updateCat = (id, params) => async dispatch => {
-  // FIXME: Api post
-  Object.assign(defaultCats.find(cat => cat.id === id), params);
-  dispatch({ type: UPDATE_CAT, cat: set('id', id, params) });
+  try {
+    const cat = await dispatch(fetchJson('POST', `/cats/${id}`, params));
+    dispatch({ type: UPDATE_CAT, cat });
+  } catch (e) {
+    // FIXME: Handle errors
+  }
 };
 
-export const addCat = cat => async dispatch => {
-  dispatch({ type: ADD_CAT, cat });
+export const addCat = params => async dispatch => {
+  try {
+    const cat = await dispatch(fetchJson('PUT', '/cats', params));
+    dispatch({ type: UPDATE_CAT, cat });
+  } catch (e) {
+    // FIXME: Handle errors
+  }
 };
 
 export const deleteCat = id => async dispatch => {
-  dispatch({ type: REMOVE_CAT, id });
+  try {
+    await dispatch(fetchJson('DELETE', `/cats/${id}`));
+    dispatch({ type: REMOVE_CAT, id });
+  } catch (e) {
+    // FIXME: Handle errors
+  }
 };
 
 export const updateRemoveCatViaForm = inputParams => async dispatch => {

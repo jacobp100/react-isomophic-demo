@@ -6,7 +6,6 @@ import {
   template, map, flatMap, flow, compact, cond, isFunction, identity, constant, values,
 } from 'lodash/fp';
 import React from 'react';
-import yargs from 'yargs';
 import { renderToString } from 'react-dom/server';
 import Express from 'express';
 import bodyParser from 'body-parser';
@@ -24,50 +23,29 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 
-const args = yargs
-  .option('port', {
-    alias: 'p',
-    type: 'number',
-    default: 8080,
-  })
-  .option('server-endpoint', {
-    alias: 's',
-    type: 'string',
-    default: '',
-  })
-  .option('client-endpoint', {
-    alias: 'c',
-    type: 'string',
-    default: '',
-  })
-  .help()
-  .argv;
+const config = {
+  clientEndpoint: 'http://localhost:8081',
+  serverEndpoint: 'http://localhost:8081',
+  port: 8080,
+};
+
 
 let index = readFileSync(join(__dirname, './index.html'));
 index = template(index);
 
 const server = new Express();
-server.set('x-powered-by', false);
 server.use(bodyParser.urlencoded({ extended: true }));
 
 
 // STATIC FILES
 server.use('/dist', Express.static(join(__dirname, '../dist')));
-server.use('/assets', Express.static(join(__dirname, '../assets')));
-
-
-// LOGGING
-server.all('*', (req, res, next) => {
-  console.log('Requested', req.url);
-  next();
-});
 
 
 // SETUP STORE
 server.all('*', (req, res, next) => {
   const middlewares = applyMiddleware(
     thunk,
-    fetchMiddleware(fetch)
+    fetchMiddleware(config.serverEndpoint, fetch)
   );
   req.store = createStore(reducers, middlewares);
 
@@ -135,7 +113,7 @@ server.all('*', (req, res) => {
         })
         .then(({ markup, reduxState }) => {
           res.send(index({
-            apiEndpoint: args['client-endpoint'],
+            apiEndpoint: config.clientEndpoint,
             markup,
             reduxState,
           }));
@@ -146,7 +124,7 @@ server.all('*', (req, res) => {
   });
 });
 
-server.listen(args.port, err => {
+server.listen(config.port, err => {
   if (err) {
     console.error(err);
   } else {

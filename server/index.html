@@ -1,9 +1,10 @@
 <!doctype html>
 <title>Cats</title>
 <meta charset="utf-8">
+<script src="https://cdn.polyfill.io/v2/polyfill.js?features=fetch|gated"></script>
 <div id="cats"><%= markup %></div>
 <script>
 window.__API_ENDPOINT__ = <%= JSON.stringify(apiEndpoint) %>;
 window.__REDUX_STATE__ = <%= JSON.stringify(reduxState) %>;
 </script>
-<script src="/dist/cats.js"></script>
+<script src="/dist/client.js"></script>
