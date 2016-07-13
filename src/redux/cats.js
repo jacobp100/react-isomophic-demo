@@ -11,6 +11,7 @@ const addUpdateRemoveCatSchema = yup.object().shape({
   id: yup.string(),
   name: yup.string().required('You must provide a name'),
   age: yup.number().typeError('Must be a number'),
+  gender: yup.string().oneOf(['male', 'female'], 'Must select a valid gender'),
 });
 
 const defaultState = {

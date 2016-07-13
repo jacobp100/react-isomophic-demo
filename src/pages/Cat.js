@@ -35,6 +35,14 @@ class Cats extends Component {
             <input id="age" type="number" name="age" defaultValue={cat.age} />
             <div>{formErrors.age}</div>
           </div>
+          <div>
+            <label htmlFor="gender">Gender</label>
+            <select id="gender" name="gender" defaultValue={cat.gender}>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            <div>{formErrors.gender}</div>
+          </div>
           <button name="action" value="update" onClick={handleFormSubmission}>
             Update
           </button>

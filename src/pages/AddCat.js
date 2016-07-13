@@ -19,6 +19,14 @@ const AddCat = ({ formErrors, handleCatAddition }) => (
         <input id="age" type="number" name="age" />
         <div>{formErrors.age}</div>
       </div>
+      <div>
+        <label htmlFor="gender">Gender</label>
+        <select id="gender" name="gender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+        <div>{formErrors.gender}</div>
+      </div>
       <button>
         Add
       </button>
