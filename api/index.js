@@ -35,7 +35,9 @@ server.delete('/cats/:id', (req, res) => {
     return;
   }
 
-  res.status(200).send('');
+  database.cats.splice(catIndex, 1);
+
+  res.json('');
 });
 
 server.post('/cats/:id', (req, res) => {

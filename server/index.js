@@ -55,13 +55,19 @@ server.all('*', (req, res, next) => {
 
 // FORM HANDLERS
 server.post('*', async (req, res, next) => {
-  const handler = handlers[req.body.handler];
+  let { handler, redirect } = handlers[req.body.handler]; // eslint-disable-line
 
   try {
-    if (handler) await req.store.dispatch(handler(req.body));
+    const params = req.body;
+    await req.store.dispatch(handler(params));
+    if (typeof redirect === 'function') redirect = redirect(params);
+    if (redirect) {
+      res.redirect(redirect);
+    } else {
+      next();
+    }
   } catch (e) {
     console.log(e); // eslint-disable-line
-  } finally {
     next();
   }
 });

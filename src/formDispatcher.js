@@ -1,4 +1,5 @@
 import serialize from 'form-serialize';
+import history from './history';
 import handlers from './handlers';
 
 
@@ -17,15 +18,15 @@ export const getFormData = event => {
   return params;
 };
 
-export const formDispatcher = (dispatch, cb) => async event => {
+export const formDispatcher = dispatch => async event => {
   const params = getFormData(event);
-  const fn = handlers[params.handler];
+  let { handler, redirect } = handlers[params.handler]; // eslint-disable-line
 
   try {
-    await dispatch(fn(params));
-    if (cb) cb();
+    await dispatch(handler(params));
+    if (typeof redirect === 'function') redirect = redirect(params);
+    if (redirect) history.push(redirect);
   } catch (e) {
-    if (cb) cb(e);
     throw e;
   }
 };

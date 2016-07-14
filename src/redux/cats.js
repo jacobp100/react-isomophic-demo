@@ -1,5 +1,5 @@
 import {
-  __, flow, set, update, map, reduce, assign, reject, equals, omit, curry, union, flip, compact,
+  __, flow, set, update, map, reduce, assign, reject, equals, curry, union, flip, compact,
 } from 'lodash/fp';
 import yup from 'yup';
 import { fetchJson } from '../middlewares/fetch';
@@ -7,8 +7,6 @@ import { yupErrors } from '../util';
 
 
 const addUpdateRemoveCatSchema = yup.object().shape({
-  action: yup.string(),
-  id: yup.string(),
   name: yup.string().required('You must provide a name'),
   age: yup.number().typeError('Must be a number'),
   gender: yup.string().oneOf(['male', 'female'], 'Must select a valid gender'),
@@ -111,7 +109,8 @@ export const setQueryParams = inputParams => async dispatch => {
 
 export const updateRemoveCatViaForm = inputParams => async dispatch => {
   try {
-    const { action, id, ...params } = await addUpdateRemoveCatSchema.validate(inputParams, {
+    const { action, id } = inputParams;
+    const params = await addUpdateRemoveCatSchema.validate(inputParams, {
       abortEarly: false,
       stripUnknown: true,
     });
@@ -129,11 +128,10 @@ export const updateRemoveCatViaForm = inputParams => async dispatch => {
 
 export const addCatViaForm = inputParams => async dispatch => {
   try {
-    let params = await addUpdateRemoveCatSchema.validate(inputParams, {
+    const params = await addUpdateRemoveCatSchema.validate(inputParams, {
       abortEarly: false,
       stripUnknown: true,
     });
-    params = omit(['action', 'id'], params);
     dispatch(addCat(params));
   } catch (e) {
     const errors = yupErrors(e);

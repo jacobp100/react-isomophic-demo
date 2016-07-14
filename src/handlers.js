@@ -1,6 +1,12 @@
 import { addCatViaForm, updateRemoveCatViaForm } from './redux/cats';
 
 export default {
-  'add-cat': addCatViaForm,
-  'update-remove-cat': updateRemoveCatViaForm,
+  'add-cat': {
+    handler: addCatViaForm,
+    redirect: '/',
+  },
+  'update-remove-cat': {
+    handler: updateRemoveCatViaForm,
+    redirect: params => (params.action === 'remove' ? '/' : null),
+  },
 };

@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import history from '../history';
 import { formDispatcher } from '../formDispatcher';
 
 const AddCat = ({ formErrors, handleCatAddition }) => (
@@ -40,9 +39,6 @@ export default connect(
     formErrors: state.cats.formErrorsPerCat['@@add-cat'] || {},
   }),
   dispatch => ({
-    handleCatAddition: formDispatcher(dispatch, err => {
-      if (!err) history.push('/');
-    }),
-    dispatch,
+    handleCatAddition: formDispatcher(dispatch),
   })
 )(AddCat);

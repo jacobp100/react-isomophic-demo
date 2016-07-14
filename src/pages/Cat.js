@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import history from '../history';
 import { getCats } from '../redux/cats';
 import { formDispatcher } from '../formDispatcher';
 
@@ -15,7 +14,7 @@ class Cats extends Component {
   }
 
   render() {
-    const { cat, formErrors, handleCatDeletion, handleFormSubmission } = this.props;
+    const { cat, formErrors, handleCatUpdateDelete } = this.props;
 
     if (!cat) return <div />;
 
@@ -43,10 +42,10 @@ class Cats extends Component {
             </select>
             <div>{formErrors.gender}</div>
           </div>
-          <button name="action" value="update" onClick={handleFormSubmission}>
+          <button name="action" value="update" onClick={handleCatUpdateDelete}>
             Update
           </button>
-          <button name="action" value="remove" onClick={handleCatDeletion}>
+          <button name="action" value="remove" onClick={handleCatUpdateDelete}>
             Delete
           </button>
         </form>
@@ -62,10 +61,7 @@ export default connect(
     formErrors: state.cats.formErrorsPerCat[params.id] || {},
   }),
   dispatch => ({
-    handleFormSubmission: formDispatcher(dispatch),
-    handleCatDeletion: formDispatcher(dispatch, err => {
-      if (!err) history.push('/');
-    }),
+    handleCatUpdateDelete: formDispatcher(dispatch),
     dispatch,
   })
 )(Cats);
