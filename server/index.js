@@ -2,9 +2,7 @@
 
 import 'babel-regenerator-runtime';
 
-import {
-  template, map, flatMap, flow, compact, cond, isFunction, identity, constant, values,
-} from 'lodash/fp';
+import { template, map, flow, compact } from 'lodash/fp';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import Express from 'express';
@@ -30,8 +28,8 @@ const config = {
 };
 
 
-let index = readFileSync(join(__dirname, './index.html'));
-index = template(index);
+const index = readFileSync(join(__dirname, './index.html'));
+const renderTemplate = template(index);
 
 const server = new Express();
 server.use(bodyParser.urlencoded({ extended: true }));
@@ -55,19 +53,23 @@ server.all('*', (req, res, next) => {
 
 // FORM HANDLERS
 server.post('*', async (req, res, next) => {
-  let { handler, redirect } = handlers[req.body.handler]; // eslint-disable-line
-
   try {
-    const params = req.body;
-    await req.store.dispatch(handler(params));
-    if (typeof redirect === 'function') redirect = redirect(params);
+    const actionParams = req.body;
+    let { actionCreator, redirect } = handlers[actionParams.handler]; // eslint-disable-line
+    const action = actionCreator(actionParams);
+    await req.store.dispatch(action);
+
+    if (typeof redirect === 'function') {
+      redirect = redirect(actionParams);
+    }
+
     if (redirect) {
       res.redirect(redirect);
     } else {
       next();
     }
   } catch (e) {
-    console.log(e); // eslint-disable-line
+    console.log(e);
     next();
   }
 });
@@ -86,13 +88,9 @@ server.all('*', (req, res) => {
       res.status(404).send('Not found');
     } else {
       const { location, params } = renderProps;
-      const { dispatch } = store;
+      const { dispatch, getState } = store;
 
       const dataFetchingRequirements = flow(
-        flatMap(cond([
-          [isFunction, identity],
-          [constant(true), values],
-        ])),
         map('WrappedComponent.fetchData'),
         compact,
         map(fetchData => fetchData({ location, params, dispatch }))
@@ -101,7 +99,7 @@ server.all('*', (req, res) => {
       Promise.all(dataFetchingRequirements)
         .catch(() => {}) // Ignore errors from data fetching
         .then(() => {
-          const reduxState = store.getState();
+          const reduxState = getState();
           const markup = renderToString(
             <Provider store={store}>
               <RouterContext {...renderProps} />
@@ -118,7 +116,7 @@ server.all('*', (req, res) => {
           return { markup, reduxState: null };
         })
         .then(({ markup, reduxState }) => {
-          res.send(index({
+          res.send(renderTemplate({
             apiEndpoint: config.clientEndpoint,
             markup,
             reduxState,

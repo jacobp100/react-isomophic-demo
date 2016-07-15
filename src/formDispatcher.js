@@ -9,24 +9,23 @@ export const getFormData = event => {
   const { currentTarget } = event;
   const isChild = 'form' in currentTarget;
   const form = isChild ? currentTarget.form : currentTarget;
-  const params = serialize(form, { hash: true, empty: true });
+  const actionParams = serialize(form, { hash: true, empty: true });
 
   if (isChild && currentTarget.tagName === 'BUTTON' && currentTarget.name) {
-    params[currentTarget.name] = currentTarget.value;
+    actionParams[currentTarget.name] = currentTarget.value;
   }
 
-  return params;
+  return actionParams;
 };
 
 export const formDispatcher = dispatch => async event => {
-  const params = getFormData(event);
-  let { handler, redirect } = handlers[params.handler]; // eslint-disable-line
+  const actionParams = getFormData(event);
 
-  try {
-    await dispatch(handler(params));
-    if (typeof redirect === 'function') redirect = redirect(params);
-    if (redirect) history.push(redirect);
-  } catch (e) {
-    throw e;
-  }
+  let { actionCreator, redirect } = handlers[actionParams.handler]; // eslint-disable-line
+
+  const action = actionCreator(actionParams);
+  await dispatch(action);
+
+  if (typeof redirect === 'function') redirect = redirect(actionParams);
+  if (redirect) history.push(redirect);
 };
