@@ -2,6 +2,10 @@
 
 See blog posts for details on implementations.
 
+Open an issue if you need something clarifying.
+
+# Running
+
 This comprises of a client, server, and a quick API for demonstrational purposes.
 
 You'll need to have the API running for this project, which can be done with `node api`.
