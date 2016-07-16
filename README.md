@@ -4,7 +4,7 @@ See blog posts for details on implementations.
 
 Open an issue if you need something clarifying.
 
-# Running
+## Running
 
 This comprises of a client, server, and a quick API for demonstrational purposes.
 
