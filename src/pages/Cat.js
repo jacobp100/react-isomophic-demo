@@ -14,7 +14,7 @@ class Cats extends Component {
   }
 
   render() {
-    const { cat, formErrors, handleCatUpdateDelete } = this.props;
+    const { cat, formErrors, handleCatUpdateRemove } = this.props;
 
     if (!cat) return <div />;
 
@@ -42,10 +42,10 @@ class Cats extends Component {
             </select>
             <div>{formErrors.gender}</div>
           </div>
-          <button name="action" value="update" onClick={handleCatUpdateDelete}>
+          <button name="action" value="update" onClick={handleCatUpdateRemove}>
             Update
           </button>
-          <button name="action" value="remove" onClick={handleCatUpdateDelete}>
+          <button name="action" value="remove" onClick={handleCatUpdateRemove}>
             Delete
           </button>
         </form>
@@ -61,7 +61,7 @@ export default connect(
     formErrors: state.cats.formErrorsPerCat[params.id] || {},
   }),
   dispatch => ({
-    handleCatUpdateDelete: formDispatcher(dispatch),
+    handleCatUpdateRemove: formDispatcher(dispatch),
     dispatch,
   })
 )(Cats);

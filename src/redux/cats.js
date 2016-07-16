@@ -93,7 +93,7 @@ export const addCat = params => async dispatch => {
   }
 };
 
-export const deleteCat = id => async dispatch => {
+export const removeCat = id => async dispatch => {
   try {
     await dispatch(fetchJson('DELETE', `/cats/${id}`));
     dispatch({ type: REMOVE_CAT, id });
@@ -116,7 +116,7 @@ export const updateRemoveCatViaForm = inputParams => async dispatch => {
     });
 
     return await action === 'remove'
-      ? dispatch(deleteCat(id))
+      ? dispatch(removeCat(id))
       : dispatch(updateCat(id, params));
   } catch (e) {
     const errors = yupErrors(e);
