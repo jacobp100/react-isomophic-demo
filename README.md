@@ -2,6 +2,9 @@
 
 See blog posts for details on implementations.
 
+* [Post 1](https://medium.com/@jacobp/progressive-enhancement-techniques-for-react-part-1-7a551966e4bf#.4wjw0grw2)
+* [Post 2](https://medium.com/@jacobp/progressive-enhancement-techniques-for-react-part-2-5cb21bf308e5#.ugemu980s)
+
 Open an issue if you need something clarifying.
 
 ## Running
