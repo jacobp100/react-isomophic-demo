@@ -13,6 +13,19 @@ const commonConfig = {
   },
 };
 
+const nodeCommonConfig = {
+  ...commonConfig,
+  node: {
+    console: false,
+    global: false,
+    process: false,
+    Buffer: false,
+    __filename: false,
+    __dirname: false,
+    setImmediate: false,
+  },
+};
+
 gulp.task('html', () => (
   gulp.src('server/index.html')
     .pipe(gulp.dest('build'))
@@ -42,7 +55,7 @@ gulp.task('client', cb => {
 
 gulp.task('server', ['html'], cb => {
   webpack({
-    ...commonConfig,
+    ...nodeCommonConfig,
     entry: './server/index',
     target: 'node',
     output: {
@@ -51,16 +64,21 @@ gulp.task('server', ['html'], cb => {
       library: 'demoServer',
       libraryTarget: 'commonjs2',
     },
-    node: {
-      console: false,
-      global: false,
-      process: false,
-      Buffer: false,
-      __filename: false,
-      __dirname: false,
-      setImmediate: false,
+  }, cb);
+});
+
+gulp.task('api', cb => {
+  webpack({
+    ...nodeCommonConfig,
+    entry: './api/index',
+    target: 'node',
+    output: {
+      path: join(__dirname, 'build'),
+      filename: 'api.js',
+      library: 'demoServer',
+      libraryTarget: 'commonjs2',
     },
   }, cb);
 });
 
-gulp.task('default', ['server', 'client']);
+gulp.task('default', ['server', 'client', 'api']);

@@ -11,14 +11,9 @@ Open an issue if you need something clarifying.
 
 This comprises of a client, server, and a quick API for demonstrational purposes.
 
-You'll need to have the API running for this project, which can be done with `node api` (see note).
+To build the client, server, and api, run `gulp`. Gulp will put the client files in `/dist`, and the server and api files in `/build` (since dist is a public folder and we don't want to expose the server or api).
 
-To build the client and the server, it's `gulp`. Gulp will put the client files in `/dist`, and the
-server files in `/build` (since dist is a public folder and we don't want to expose the server).
+When the server and api are built, they can be run with `node build/server` and `node build/api`, respectively.
 
-When the server is built, in can be run with `node build/server`.
-
-Try running this project with and without JavaScript---in Safari, this can be toggled in the
-*Developer* menu
-
-Note: For the moment, the api only runs natively in node >= 6. If you need to run in an older version, `npm install -g babel-cli` and then run `babel-node` api instead.
+When the server is running, you can head to `localhost:8080` in your browser. Try running this project with and without JavaScript---in Safari, this can be toggled in the
+*Developer* menu!
