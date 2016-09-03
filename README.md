@@ -12,7 +12,7 @@ Open an issue if you need something clarifying.
 
 ### Form Handling
 
-In post 1, we put a separate form handlers for action creators inside the reducers. The concept of splitting the main action creator from the form validation remains the same. However, [the form handling has now been moved to formDispatcher](https://github.com/jacobp100/react-isomophic-demo/commit/09009b73070aaf3f0adfb32f63600f24cfdf8114); and there is a new reducer for forms, which contains schema errors, submission errors, and whether a form is being submitted.
+In post 1, [we put a separate form handlers for action creators inside the reducers](https://medium.com/@jacobp100/see-readme-4029b6c93733#.pb9xfm8pv). The concept of splitting the main action creator from the form validation remains the same. However, [the form handling has now been moved to formDispatcher](https://github.com/jacobp100/react-isomophic-demo/commit/09009b73070aaf3f0adfb32f63600f24cfdf8114); and there is a new reducer for forms, which contains schema errors, submission errors, and whether a form is being submitted.
 
 This centralised the form handling, and made it so that every form would always get relevant errors and submission state without any extra work. I highly recommend you follow this new way if using the form techniques discussed.
 
