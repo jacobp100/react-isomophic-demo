@@ -8,6 +8,12 @@ See blog posts for details on implementations.
 
 Open an issue if you need something clarifying.
 
+## Changes from Blog Post
+
+### Form Handling
+
+In post 1, we put a separate form handlers for action creators inside the reducers. The concept of splitting the main action creator from the form validation remains the same. However, the form handling has now been moved to formDispatcher; and there is a new reducer for forms, which contains schema errors, submission errors, and whether a form is being submitted. This centralised the form handling, and made it so that every form would always get relevant errors and submission state without any extra work. I highly recommend you follow this new way if using the form techniques discussed.
+
 ## Running
 
 This comprises of a client, server, and a quick API for demonstrational purposes.

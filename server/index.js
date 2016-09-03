@@ -13,9 +13,9 @@ import thunk from 'redux-thunk';
 import { RouterContext, match } from 'react-router';
 import fetch from 'node-fetch';
 import fetchMiddleware from '../src/middlewares/fetch';
-import handlers from '../src/handlers';
 import routes from '../src/routes';
 import { reducers } from '../src/redux';
+import formDispatcherBase from '../src/formDispatcherBase';
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -54,14 +54,8 @@ server.all('*', (req, res, next) => {
 // FORM HANDLERS
 server.post('*', async (req, res, next) => {
   try {
-    const actionParams = req.body;
-    let { actionCreator, redirect } = handlers[actionParams.handler]; // eslint-disable-line
-    const action = actionCreator(actionParams);
-    await req.store.dispatch(action);
-
-    if (typeof redirect === 'function') {
-      redirect = redirect(actionParams);
-    }
+    const inputParams = req.body;
+    const { redirect } = await req.store.dispatch(formDispatcherBase(inputParams));
 
     if (redirect) {
       res.redirect(redirect);

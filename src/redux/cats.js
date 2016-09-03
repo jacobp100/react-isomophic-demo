@@ -1,21 +1,12 @@
 import {
   __, flow, set, update, map, reduce, assign, reject, equals, curry, union, flip, compact,
 } from 'lodash/fp';
-import yup from 'yup';
 import { fetchJson } from '../middlewares/fetch';
-import { yupErrors } from '../util';
 
-
-const addUpdateRemoveCatSchema = yup.object().shape({
-  name: yup.string().required('You must provide a name'),
-  age: yup.number().typeError('Must be a number'),
-  gender: yup.string().oneOf(['male', 'female'], 'Must select a valid gender'),
-});
 
 const defaultState = {
   catIds: [],
   cats: {},
-  formErrorsPerCat: {},
   genderFilter: '',
   didSetCats: false,
 };
@@ -63,16 +54,12 @@ export const getCats = () => async (dispatch, getState) => {
 
   if (didSetCats) return;
 
-  try {
-    const query = compact([
-      genderFilter && `gender=${genderFilter}`,
-    ]).join('&');
-    const url = compact(['/cats', query]).join('?');
-    const cats = await dispatch(fetchJson('GET', url));
-    dispatch({ type: SET_CATS, cats });
-  } catch (e) {
-    // FIXME: Handle errors
-  }
+  const query = compact([
+    genderFilter && `gender=${genderFilter}`,
+  ]).join('&');
+  const url = compact(['/cats', query]).join('?');
+  const cats = await dispatch(fetchJson('GET', url));
+  dispatch({ type: SET_CATS, cats });
 };
 
 export const updateCat = (id, params) => async dispatch => {
@@ -80,7 +67,7 @@ export const updateCat = (id, params) => async dispatch => {
     const cat = await dispatch(fetchJson('POST', `/cats/${id}`, params));
     dispatch({ type: UPDATE_CAT, cat });
   } catch (e) {
-    // FIXME: Handle errors
+    throw new Error('Failed to update cat');
   }
 };
 
@@ -89,7 +76,7 @@ export const addCat = params => async dispatch => {
     const cat = await dispatch(fetchJson('PUT', '/cats', params));
     dispatch({ type: UPDATE_CAT, cat });
   } catch (e) {
-    // FIXME: Handle errors
+    throw new Error('Failed to add cat');
   }
 };
 
@@ -98,44 +85,11 @@ export const removeCat = id => async dispatch => {
     await dispatch(fetchJson('DELETE', `/cats/${id}`));
     dispatch({ type: REMOVE_CAT, id });
   } catch (e) {
-    // FIXME: Handle errors
+    throw new Error('Failed to remove cat');
   }
 };
 
 export const setQueryParams = inputParams => async dispatch => {
   // Async because you might use validation
   dispatch({ type: SET_FILTER, genderFilter: inputParams.gender });
-};
-
-export const updateRemoveCatViaForm = inputParams => async dispatch => {
-  try {
-    const { action, id } = inputParams;
-    const params = await addUpdateRemoveCatSchema.validate(inputParams, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-
-    return await action === 'remove'
-      ? dispatch(removeCat(id))
-      : dispatch(updateCat(id, params));
-  } catch (e) {
-    const errors = yupErrors(e);
-    const id = inputParams.id;
-    dispatch({ type: SET_CAT_FORM_ERRORS, id, errors });
-    throw e;
-  }
-};
-
-export const addCatViaForm = inputParams => async dispatch => {
-  try {
-    const params = await addUpdateRemoveCatSchema.validate(inputParams, {
-      abortEarly: false,
-      stripUnknown: true,
-    });
-    dispatch(addCat(params));
-  } catch (e) {
-    const errors = yupErrors(e);
-    dispatch({ type: SET_CAT_FORM_ERRORS, id: '@@add-cat', errors });
-    throw e;
-  }
 };

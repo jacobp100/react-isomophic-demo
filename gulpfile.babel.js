@@ -48,7 +48,6 @@ gulp.task('client', cb => {
         },
       }),
       new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.UglifyJsPlugin(),
     ],
   }, cb);
 });

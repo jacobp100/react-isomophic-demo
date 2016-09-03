@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import { __, map, update, assign } from 'lodash/fp';
-import history from '../history';
+import { map } from 'lodash/fp';
 import { setQueryParams, getCats } from '../redux/cats';
-import { getFormData } from '../formDispatcher';
+import createQueryParameterHandler from '../queryParameterHandlerBrowser';
 
 class Cats extends Component {
   static fetchData({ location, dispatch }) {
@@ -62,11 +61,7 @@ export default connect(
     genderFilter: state.cats.genderFilter,
   }),
   (dispatch, { location }) => ({
-    setFilter: e => {
-      const formQuery = getFormData(e);
-      const locationWithFormQuery = update('query', assign(__, formQuery), location);
-      history.replace(locationWithFormQuery);
-    },
+    setFilter: createQueryParameterHandler(location),
     dispatch,
   })
 )(Cats);
