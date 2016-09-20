@@ -1,5 +1,7 @@
 # React Isomorphic Demo
 
+# See `react-router-4` branch for React Router 4
+
 See blog posts for details on implementations.
 
 * [Post 1](https://medium.com/@jacobp/progressive-enhancement-techniques-for-react-part-1-7a551966e4bf#.4wjw0grw2)
