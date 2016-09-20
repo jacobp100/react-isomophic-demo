@@ -1,6 +1,6 @@
 # React Isomorphic Demo
 
-# See `react-router-4` branch for React Router 4
+### See [react-router-4 branch](https://github.com/jacobp100/react-isomophic-demo/tree/react-router-4) for React Router 4
 
 See blog posts for details on implementations.
 
