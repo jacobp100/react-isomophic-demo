@@ -1,15 +1,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
-import { createFormDispatcher } from '../formDispatcherBrowser';
+import { formHandler } from '../formDispatcherBrowser';
 
 
 const getFormRef = () => 'add-cat';
 
-const AddCat = ({ schemaErrors, submissionError, isSubmitting, handleCatAddition }) => (
+const AddCat = ({ schemaErrors, submissionError, isSubmitting, formHandler }) => (
   <div>
     <h1>Add Cat</h1>
-    <form method="POST" onSubmit={handleCatAddition}>
+    <form method="POST" onSubmit={formHandler}>
       <input type="hidden" name="form[handler]" value="add-cat" />
       <input type="hidden" name="form[ref]" value={getFormRef()} />
       <div>
@@ -45,7 +45,5 @@ export default connect(
     submissionError: state.forms.submissionError[getFormRef()] || '',
     isSubmitting: state.forms.isSubmitting[getFormRef()] || false,
   }),
-  dispatch => ({
-    handleCatAddition: createFormDispatcher(dispatch),
-  })
+  { formHandler }
 )(AddCat);

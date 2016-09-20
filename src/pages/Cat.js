@@ -2,22 +2,23 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { getCats } from '../redux/cats';
-import { createFormDispatcher } from '../formDispatcherBrowser';
+import { formHandler } from '../formDispatcherBrowser';
 
 
 const getFormRef = id => `update-remove-cat:${id}`;
 
-class Cats extends Component {
-  static fetchData({ dispatch }) {
-    return dispatch(getCats());
+class Cat extends Component {
+  static fetchData({ getCats }) {
+    return getCats();
   }
 
-  componentDidMount() {
-    Cats.fetchData(this.props);
+  constructor(props) {
+    super();
+    Cat.fetchData(props);
   }
 
   render() {
-    const { cat, schemaErrors, submissionError, isSubmitting, handleCatUpdateRemove } = this.props;
+    const { cat, schemaErrors, submissionError, isSubmitting, formHandler } = this.props;
 
     if (!cat) return <div />;
 
@@ -65,7 +66,7 @@ class Cats extends Component {
           <button
             name="action"
             value="update"
-            onClick={handleCatUpdateRemove}
+            onClick={formHandler}
             disabled={isSubmitting}
           >
             Update
@@ -73,7 +74,7 @@ class Cats extends Component {
           <button
             name="action"
             value="remove"
-            onClick={handleCatUpdateRemove}
+            onClick={formHandler}
             disabled={isSubmitting}
           >
             Delete
@@ -93,8 +94,5 @@ export default connect(
     submissionError: state.forms.submissionError[getFormRef(params.id)] || '',
     isSubmitting: state.forms.isSubmitting[getFormRef(params.id)] || false,
   }),
-  dispatch => ({
-    handleCatUpdateRemove: createFormDispatcher(dispatch),
-    dispatch,
-  })
-)(Cats);
+  { formHandler, getCats }
+)(Cat);

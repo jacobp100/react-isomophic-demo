@@ -2,7 +2,10 @@
 
 import 'babel-regenerator-runtime';
 
-import { template, map, flow, compact } from 'lodash/fp';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+import { template } from 'lodash/fp';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import Express from 'express';
@@ -10,15 +13,12 @@ import bodyParser from 'body-parser';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
-import { RouterContext, match } from 'react-router';
+import { ServerRouter, createServerRenderContext } from 'react-router';
 import fetch from 'node-fetch';
-import fetchMiddleware from '../src/middlewares/fetch';
-import routes from '../src/routes';
+import createFetchMiddleware from '../src/middlewares/fetch';
 import { reducers } from '../src/redux';
 import formDispatcherBase from '../src/formDispatcherBase';
-
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import App from '../src/pages/App';
 
 
 const config = {
@@ -35,17 +35,29 @@ const server = new Express();
 server.use(bodyParser.urlencoded({ extended: true }));
 
 
+// UTIL
+const getFinalState = async (store) => {
+  let state;
+  do {
+    state = store.getState();
+    await Promise.resolve();
+  } while (state !== store.getState());
+};
+
+
 // STATIC FILES
 server.use('/dist', Express.static(join(__dirname, '../dist')));
 
 
 // SETUP STORE
 server.all('*', (req, res, next) => {
+  const fetchMiddleware = createFetchMiddleware(config.serverEndpoint, fetch);
   const middlewares = applyMiddleware(
     thunk,
-    fetchMiddleware(config.serverEndpoint, fetch)
+    fetchMiddleware,
   );
   req.store = createStore(reducers, middlewares);
+  req.fetchMiddleware = fetchMiddleware;
 
   next();
 });
@@ -70,59 +82,42 @@ server.post('*', async (req, res, next) => {
 
 
 // RENDER PAGE
-server.all('*', (req, res) => {
-  const { store } = req;
+server.all('*', async (req, res) => {
+  const { fetchMiddleware, store } = req;
 
-  match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-    if (redirectLocation) {
-      res.redirect(301, redirectLocation.pathname + redirectLocation.search);
-    } else if (error) {
-      res.status(500).send(error.message);
-    } else if (!renderProps) {
-      res.status(404).send('Not found');
-    } else {
-      const { location, params } = renderProps;
-      const { dispatch, getState } = store;
+  const context = createServerRenderContext();
 
-      const dataFetchingRequirements = flow(
-        map('WrappedComponent.fetchData'),
-        compact,
-        map(fetchData => fetchData({ location, params, dispatch }))
-      )(renderProps.components);
+  try {
+    let markup;
+    let fetchRequests;
+    do {
+      fetchRequests = fetchMiddleware.getFetchRequests();
+      await Promise.all(fetchRequests);
+      markup = renderToString(
+        <Provider store={store}>
+          <ServerRouter location={req.url} context={context}>
+            <App />
+          </ServerRouter>
+        </Provider>
+      );
+      await getFinalState(store);
+    } while (fetchMiddleware.getFetchRequests() !== fetchRequests);
 
-      Promise.all(dataFetchingRequirements)
-        .catch(() => {}) // Ignore errors from data fetching
-        .then(() => {
-          const reduxState = getState();
-          const markup = renderToString(
-            <Provider store={store}>
-              <RouterContext {...renderProps} />
-            </Provider>
-          );
+    // TODO: Redirects
+    // Note that form handlers have their own redirect logic
+    const reduxState = store.getState();
 
-          return { markup, reduxState };
-        })
-        .catch(e => { // But not errors from rendering to a string
-          console.error(`Failed to serve ${req.url}`);
-          console.error(e);
-
-          const markup = renderToString(<RouterContext {...renderProps} />);
-          return { markup, reduxState: null };
-        })
-        .then(({ markup, reduxState }) => {
-          res.send(renderTemplate({
-            apiEndpoint: config.clientEndpoint,
-            markup,
-            reduxState,
-          }));
-        }, () => {
-          res.status(500).send('Failed to load page');
-        });
-    }
-  });
+    res.send(renderTemplate({
+      apiEndpoint: config.clientEndpoint,
+      markup,
+      reduxState,
+    }));
+  } catch (e) {
+    res.status(500).send('Failed to load page');
+  }
 });
 
-server.listen(config.port, err => {
+server.listen(config.port, (err) => {
   if (err) {
     console.error(err);
   } else {

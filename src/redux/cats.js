@@ -62,7 +62,7 @@ export const getCats = () => async (dispatch, getState) => {
   dispatch({ type: SET_CATS, cats });
 };
 
-export const updateCat = (id, params) => async dispatch => {
+export const updateCat = (id, params) => async (dispatch) => {
   try {
     const cat = await dispatch(fetchJson('POST', `/cats/${id}`, params));
     dispatch({ type: UPDATE_CAT, cat });
@@ -71,7 +71,7 @@ export const updateCat = (id, params) => async dispatch => {
   }
 };
 
-export const addCat = params => async dispatch => {
+export const addCat = params => async (dispatch) => {
   try {
     const cat = await dispatch(fetchJson('PUT', '/cats', params));
     dispatch({ type: UPDATE_CAT, cat });
@@ -80,7 +80,7 @@ export const addCat = params => async dispatch => {
   }
 };
 
-export const removeCat = id => async dispatch => {
+export const removeCat = id => async (dispatch) => {
   try {
     await dispatch(fetchJson('DELETE', `/cats/${id}`));
     dispatch({ type: REMOVE_CAT, id });
@@ -89,7 +89,7 @@ export const removeCat = id => async dispatch => {
   }
 };
 
-export const setQueryParams = inputParams => async dispatch => {
+export const setQueryParams = inputParams => async (dispatch) => {
   // Async because you might use validation
-  dispatch({ type: SET_FILTER, genderFilter: inputParams.gender });
+  dispatch({ type: SET_FILTER, genderFilter: inputParams.gender || '' });
 };

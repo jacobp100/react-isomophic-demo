@@ -1,9 +1,9 @@
 import serialize from 'form-serialize';
-import history from './history';
 import formDispatcherBase from './formDispatcherBase';
+import { setRedirect } from './redux/browserRedirect';
 
 
-export const getFormData = event => {
+export const getFormData = (event) => {
   if ('preventDefault' in event) event.preventDefault(); // Sometimes we fake events
 
   const { currentTarget } = event;
@@ -18,12 +18,12 @@ export const getFormData = event => {
   return actionParams;
 };
 
-export const createFormDispatcher = dispatch => async event => {
+export const formHandler = event => async (dispatch) => {
   const inputParams = getFormData(event);
 
   try {
     const { redirect } = await dispatch(formDispatcherBase(inputParams));
-    if (redirect) history.push(redirect);
+    if (redirect) dispatch(setRedirect(redirect));
   } catch (e) {
     return;
   }

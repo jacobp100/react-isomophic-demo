@@ -20,7 +20,7 @@ const validateForm = async (inputParams, schema) => {
   }
 };
 
-export default inputParams => async dispatch => {
+export default inputParams => async (dispatch) => {
   let { form, ...params } = inputParams; // eslint-disable-line
   const { handler, ref = handler } = form;
 

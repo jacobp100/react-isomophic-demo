@@ -1,10 +1,10 @@
 import { __, update, assign } from 'lodash/fp';
 import { getFormData } from './formDispatcherBrowser';
-import history from './history';
+import { setRedirect } from './redux/browserRedirect';
 
 // Submitting a form GET to the server sets the query parameters to the form data
-export default location => e => {
+export default (e, location) => {
   const formQuery = getFormData(e);
   const locationWithFormQuery = update('query', assign(__, formQuery), location);
-  history.replace(locationWithFormQuery);
+  return setRedirect(locationWithFormQuery); // dispatch
 };

@@ -3,16 +3,17 @@ import { connect } from 'react-redux';
 import { Link } from 'react-router';
 import { map } from 'lodash/fp';
 import { setQueryParams, getCats } from '../redux/cats';
-import createQueryParameterHandler from '../queryParameterHandlerBrowser';
+import queryParameterHandler from '../queryParameterHandlerBrowser';
 
 class Cats extends Component {
   static fetchData({ location, dispatch }) {
-    return dispatch(setQueryParams(location.query))
+    return dispatch(setQueryParams(location.query || {}))
       .then(() => dispatch(getCats()));
   }
 
-  componentDidMount() {
-    Cats.fetchData(this.props);
+  constructor(props) {
+    super();
+    Cats.fetchData(props);
   }
 
   componentDidUpdate() {
@@ -46,7 +47,7 @@ class Cats extends Component {
           </Link>
         ), catIds)}
         <hr />
-        <Link to="/cats/add">
+        <Link to="/add-cat">
           Add Cat
         </Link>
       </div>
@@ -61,7 +62,7 @@ export default connect(
     genderFilter: state.cats.genderFilter,
   }),
   (dispatch, { location }) => ({
-    setFilter: createQueryParameterHandler(location),
+    setFilter: e => dispatch(queryParameterHandler(e, location)),
     dispatch,
   })
 )(Cats);
