@@ -113,7 +113,7 @@ server.all('*', async (req, res) => {
       reduxState,
     }));
   } catch (e) {
-    res.status(500).send('Failed to load page');
+    res.status(500).send(`<pre>Failed to load page\n${e.message}</pre>`);
   }
 });
 

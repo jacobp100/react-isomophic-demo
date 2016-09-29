@@ -13,8 +13,14 @@ const commonConfig = {
   },
 };
 
-const nodeCommonConfig = {
+const nodeConfig = {
   ...commonConfig,
+  output: {
+    path: join(__dirname, 'build'),
+    filename: '[name].js',
+    libraryTarget: 'commonjs2',
+  },
+  target: 'node',
   node: {
     console: false,
     global: false,
@@ -31,7 +37,7 @@ gulp.task('html', () => (
     .pipe(gulp.dest('build'))
 ));
 
-gulp.task('client', cb => {
+gulp.task('client', (cb) => {
   webpack({
     ...commonConfig,
     entry: './src/index',
@@ -52,32 +58,18 @@ gulp.task('client', cb => {
   }, cb);
 });
 
-gulp.task('server', ['html'], cb => {
+gulp.task('server', ['html'], (cb) => {
   webpack({
-    ...nodeCommonConfig,
-    entry: './server/index',
-    target: 'node',
-    output: {
-      path: join(__dirname, 'build'),
-      filename: 'server.js',
-      library: 'demoServer',
-      libraryTarget: 'commonjs2',
-    },
+    ...nodeConfig,
+    entry: { server: './server/index' },
   }, cb);
 });
 
-gulp.task('api', cb => {
+gulp.task('api', (cb) => {
   webpack({
-    ...nodeCommonConfig,
-    entry: './api/index',
-    target: 'node',
-    output: {
-      path: join(__dirname, 'build'),
-      filename: 'api.js',
-      library: 'demoServer',
-      libraryTarget: 'commonjs2',
-    },
+    ...nodeConfig,
+    entry: { api: './api/index' },
   }, cb);
 });
 
-gulp.task('default', ['server', 'client', 'api']);
+gulp.task('default', ['server', 'api', 'client']);
