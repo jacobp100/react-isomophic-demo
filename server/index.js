@@ -15,6 +15,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import { ServerRouter, createServerRenderContext } from 'react-router';
 import fetch from 'node-fetch';
+import createWatchFetchRequestsMiddleware from '../src/middlewares/watchFetchRequests';
 import createFetchMiddleware from '../src/middlewares/fetch';
 import { reducers } from '../src/redux';
 import formDispatcherBase from '../src/formDispatcherBase';
@@ -51,13 +52,16 @@ server.use('/dist', Express.static(join(__dirname, '../dist')));
 
 // SETUP STORE
 server.all('*', (req, res, next) => {
-  const fetchMiddleware = createFetchMiddleware(config.serverEndpoint, fetch);
+  const { middleware: watchFetchRequestsMiddleware, getFetchRequests } =
+    createWatchFetchRequestsMiddleware();
+
   const middlewares = applyMiddleware(
+    watchFetchRequestsMiddleware,
     thunk,
-    fetchMiddleware,
+    createFetchMiddleware(config.serverEndpoint, fetch)
   );
   req.store = createStore(reducers, middlewares);
-  req.fetchMiddleware = fetchMiddleware;
+  req.getFetchRequests = getFetchRequests;
 
   next();
 });
@@ -83,7 +87,7 @@ server.post('*', async (req, res, next) => {
 
 // RENDER PAGE
 server.all('*', async (req, res) => {
-  const { fetchMiddleware, store } = req;
+  const { getFetchRequests, store } = req;
 
   const context = createServerRenderContext();
 
@@ -91,7 +95,7 @@ server.all('*', async (req, res) => {
     let markup;
     let fetchRequests;
     do {
-      fetchRequests = fetchMiddleware.getFetchRequests();
+      fetchRequests = getFetchRequests();
       await Promise.all(fetchRequests);
       markup = renderToString(
         <Provider store={store}>
@@ -101,7 +105,7 @@ server.all('*', async (req, res) => {
         </Provider>
       );
       await getFinalState(store);
-    } while (fetchMiddleware.getFetchRequests() !== fetchRequests);
+    } while (getFetchRequests() !== fetchRequests);
 
     // TODO: Redirects
     // Note that form handlers have their own redirect logic
